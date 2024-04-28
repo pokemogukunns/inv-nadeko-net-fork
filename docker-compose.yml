@@ -8,22 +8,28 @@ version: "3"
 services:
 
   invidious-refresher:
-    image: git.nadeko.net/invidious/invidious:latest
+    image: git.nadeko.net/fijxu/invidious:latest
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:5432:5432"
     volumes:
-      - ./config/config.conf:/etc/config/invidious-refresher.conf
+      - ./config/config-refresher.yml:/etc/invidious/config.yml:ro
+      - ./logs:/var/log/invidious:rw
+      - /var/run/postgresql/.s.PGSQL.5432:/var/run/postgresql/.s.PGSQL.5432:rw
+      - /var/run/redis/redis.sock:/var/run/redis/redis.sock:rw
+    environment:
+      INVIDIOUS_CONFIG_FILE: /etc/invidious/config.yml
 
   invidious:
-    image: git.nadeko.net/invidious/invidious:latest
+    image: git.nadeko.net/fijxu/invidious:latest
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:5432:5432"
     deploy: 
       replicas: 4
     volumes:
-      - ./config/config.conf:/etc/config/config.conf
+      - ./config/config.yml:/etc/invidious/config.yml:ro
+      - ./logs:/var/log/invidious:rw
+      - /var/run/postgresql/.s.PGSQL.5432:/var/run/postgresql/.s.PGSQL.5432:rw
+      - /var/run/redis/redis.sock:/var/run/redis/redis.sock:rw
+    environment:
+      INVIDIOUS_CONFIG_FILE: /etc/invidious/config.yml
 
   invidious-nginx:
    image: nginx:latest
@@ -33,4 +39,4 @@ services:
    depends_on:
      - invidious
    ports:
-     - "127.0.0.1:50011:3000"
+     - "127.0.0.1:10011:3000"
