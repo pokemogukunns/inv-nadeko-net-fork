@@ -6,15 +6,6 @@ on:
   schedule:
     - cron: '0 7 * * 0'
   push:
-    branches: ["*"]
-    paths:
-      - './src/**'
-      - './lib/**'
-      - './spec/**'
-      - './locales/**'
-      - './docker/**'
-      - 'shard.yml'
-      - 'videojs-dependencies.yml'
 
 jobs:
   build:
