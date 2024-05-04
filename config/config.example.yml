@@ -854,7 +854,7 @@ default_user_preferences:
   ## Default: true
   ##
   #vr_mode: true
-  
+
   ##
   ## Save the playback position
   ## Allow to continue watching at the previous position when
@@ -962,3 +962,9 @@ default_user_preferences:
   ## Default: false
   ##
   #extend_desc: false
+
+# redis_url: 127.0.0.1:6379
+# redis_socket: /var/run/valkey/valkey.sock
+# donation_url: "https://example.com/donate"
+# contact_url: "https://example.com/contact"
+# home_domain: "https://example.com/
