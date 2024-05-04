@@ -1,10 +1,5 @@
-# Warning: This docker-compose file is made for development purposes.
-# Using it will build an image from the locally cloned repository.
-#
-# If you want to use Invidious in production, see the docker-compose.yml file provided
-# in the installation documentation: https://docs.invidious.io/installation/
+# Docker compose file for inv.nadeko.net
 
-version: "3"
 services:
 
   invidious-refresher:
@@ -14,7 +9,7 @@ services:
       - ./config/config-refresher.yml:/etc/invidious/config.yml:ro
       - ./logs:/var/log/invidious:rw
       - /var/run/postgresql/.s.PGSQL.5432:/var/run/postgresql/.s.PGSQL.5432:rw
-      - /var/run/redis/redis.sock:/var/run/redis/redis.sock:rw
+      - /var/run/valkey/valkey.sock:/var/run/redis/redis.sock:rw
     environment:
       INVIDIOUS_CONFIG_FILE: /etc/invidious/config.yml
 
@@ -22,12 +17,12 @@ services:
     image: git.nadeko.net/fijxu/invidious:latest
     restart: unless-stopped
     deploy: 
-      replicas: 4
+      replicas: 8
     volumes:
       - ./config/config.yml:/etc/invidious/config.yml:ro
       - ./logs:/var/log/invidious:rw
       - /var/run/postgresql/.s.PGSQL.5432:/var/run/postgresql/.s.PGSQL.5432:rw
-      - /var/run/redis/redis.sock:/var/run/redis/redis.sock:rw
+      - /var/run/valkey/valkey.sock:/var/run/redis/redis.sock:rw
     environment:
       INVIDIOUS_CONFIG_FILE: /etc/invidious/config.yml
 
