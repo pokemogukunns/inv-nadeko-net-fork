@@ -285,6 +285,12 @@ module YoutubeAPI
       } of String => String | Int64,
     }
 
+    visitor_data = REDIS_DB.get("VISITORDATA")
+
+    if visitor_data
+      client_context["client"]["visitorData"] = visitor_data
+    end
+
     # Add some more context if it exists in the client definitions
     if !client_config.screen.empty?
       client_context["client"]["clientScreen"] = client_config.screen
@@ -466,6 +472,9 @@ module YoutubeAPI
         "contentPlaybackContext" => {
           "html5Preference": "HTML5_PREF_WANTS",
         },
+      },
+      "serviceIntegrityDimensions" => {
+        "poToken": REDIS_DB.get("POTOKEN"),
       },
     }
 
