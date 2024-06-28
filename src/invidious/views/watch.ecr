@@ -127,6 +127,20 @@ we're going to need to do it here in order to allow for translations.
                 (<a id="link-yt-embed" data-base-url="<%= link_yt_embed %>" href="<%= link_yt_embed %>"><%= translate(locale, "videoinfo_youTube_embed_link") %></a>)
             </span>
 
+		<% if CONFIG.materialious_domain %>
+            <p id="watch-on-materialious">
+                <%-
+                    link_materialious_watch = URI.new(scheme: "https", host: "#{CONFIG.materialious_domain}", path: "/watch", query: "v=#{video.id}")
+
+                    if !plid.nil? && !continuation.nil?
+                        link_materialious_param = URI::Params{"list" => [plid], "index" => [continuation.to_s]}
+                        link_materialious_watch = IV::HttpServer::Utils.add_params_to_url(link_materialious_watch, link_materialious_param)
+                    end
+                -%>
+                <a id="link-materialious-watch" data-base-url="<%= link_materialious_watch %>" href="<%= link_materialious_watch %>"><%= translate(locale, "videoinfo_watch_on_materialious") %></a>
+            </p>
+		<% end %>
+
             <p id="watch-on-another-invidious-instance">
                 <%- link_iv_other = IV::Frontend::Misc.redirect_url(env) -%>
                 <a id="link-iv-other" data-base-url="<%= link_iv_other %>" href="<%= link_iv_other %>"><%= translate(locale, "Switch Invidious Instance") %></a>
