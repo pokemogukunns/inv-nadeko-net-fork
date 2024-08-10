@@ -166,10 +166,10 @@ if CONFIG.channel_threads > 0
   Invidious::Jobs.register Invidious::Jobs::RefreshChannelsJob.new(PG_DB)
 end
 
-DECRYPT_FUNCTION = DecryptFunction.new(CONFIG.decrypt_polling)
-if CONFIG.decrypt_polling
-  Invidious::Jobs.register Invidious::Jobs::UpdateDecryptFunctionJob.new
-end
+# DECRYPT_FUNCTION = DecryptFunction.new(CONFIG.decrypt_polling)
+# if CONFIG.decrypt_polling
+#   Invidious::Jobs.register Invidious::Jobs::UpdateDecryptFunctionJob.new
+# end
 
 if CONFIG.statistics_enabled
   Invidious::Jobs.register Invidious::Jobs::StatisticsRefreshJob.new(PG_DB, SOFTWARE)
