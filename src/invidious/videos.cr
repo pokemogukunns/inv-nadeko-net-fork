@@ -116,6 +116,10 @@ struct Video
     n = DECRYPT_FUNCTION.try &.decrypt_nsig(params["n"])
     params["n"] = n if n
 
+    if token = CONFIG.po_token
+      params["pot"] = token
+    end
+
     params["host"] = url.host.not_nil!
     if region = self.info["region"]?.try &.as_s
       params["region"] = region
@@ -416,10 +420,6 @@ end
 
 def fetch_video(id, region)
   info = extract_video_info(video_id: id)
-
-  allowed_regions = info
-    .dig?("microformat", "playerMicroformatRenderer", "availableCountries")
-    .try &.as_a.map &.as_s || [] of String
 
   if reason = info["reason"]?
     if reason == "Video unavailable"
