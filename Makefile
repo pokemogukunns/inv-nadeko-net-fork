@@ -42,7 +42,7 @@ get-libs:
 
 # TODO: add support for ARM64 via cross-compilation
 invidious: get-libs
-	crystal build src/invidious.cr $(FLAGS) --progress --stats --error-trace
+	crystal build src/invidious.cr $(FLAGS) --progress --stats --error-trace --mcpu=x86-64-v3
 
 
 run: invidious
