@@ -88,6 +88,8 @@ class Config
   property hmac_key : String = ""
   # Domain to be used for links to resources on the site where an absolute URL is required
   property domain : String?
+  # Alternative domains. You can add other domains, like TOR and I2P addresses
+  property alternative_domains : Array(String) = [] of String
   property donation_url : String?
   property contact_url : String?
   property home_domain : String?
