@@ -164,6 +164,9 @@ class Config
   # Playlist length limit
   property playlist_length_limit : Int32 = 500
 
+  # The max resolution the Instance can offer
+  property max_dash_resolution : Int32?
+
   # Materialious redirects
   property materialious_domain : String?
 

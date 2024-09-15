@@ -120,6 +120,13 @@ module Invidious::Routes::Watch
     fmt_stream = video.fmt_stream
     adaptive_fmts = video.adaptive_fmts
 
+	# Removes all the resolutions with a height higher than CONFIG.max_dash_resolution
+    if CONFIG.max_dash_resolution
+      adaptive_fmts.reject! do |z|
+        (z["height"].as_i > CONFIG.max_dash_resolution.not_nil!) if z["height"]?
+      end
+    end
+
     if params.local
       fmt_stream.each { |fmt| fmt["url"] = JSON::Any.new(URI.parse(fmt["url"].as_s).request_target) }
       adaptive_fmts.each { |fmt| fmt["url"] = JSON::Any.new(URI.parse(fmt["url"].as_s).request_target) }
@@ -127,6 +134,13 @@ module Invidious::Routes::Watch
 
     video_streams = video.video_streams
     audio_streams = video.audio_streams
+
+	# Removes all the resolutions with a height higher than CONFIG.max_dash_resolution
+    if CONFIG.max_dash_resolution
+      video_streams.reject! do |z|
+        (z["height"].as_i > CONFIG.max_dash_resolution.not_nil!) if z["height"]?
+      end
+    end
 
     # Older videos may not have audio sources available.
     # We redirect here so they're not unplayable
