@@ -53,6 +53,10 @@ end
 def extract_video_info(video_id : String)
   # Init client config for the API
   client_config = YoutubeAPI::ClientConfig.new
+  # Use the WEB_CREATOR when po_token is configured because it fully only works on this client
+  if CONFIG.po_token
+    client_config.client_type = YoutubeAPI::ClientType::WebCreator
+  end
 
   # Fetch data from the player endpoint
   player_response = YoutubeAPI.player(video_id: video_id, params: "2AMB", client_config: client_config)
@@ -102,6 +106,13 @@ def extract_video_info(video_id : String)
 
   new_player_response = nil
 
+  # Second try in case WEB_CREATOR doesn't work with po_token.
+  # Only trigger if reason found and po_token configured.
+  if reason && CONFIG.po_token
+    client_config.client_type = YoutubeAPI::ClientType::WebEmbeddedPlayer
+    new_player_response = try_fetch_streaming_data(video_id, client_config)
+  end
+
   # Don't use Android client if po_token is passed because po_token doesn't
   # work for Android client.
   if reason.nil? && CONFIG.po_token.nil?
@@ -114,10 +125,9 @@ def extract_video_info(video_id : String)
   end
 
   # Last hope
-  # Only trigger if reason found and po_token or didn't work wth Android client.
-  # TvHtml5ScreenEmbed now requires sig helper for it to work but po_token is not required
-  # if the IP address is not blocked.
-  if CONFIG.po_token && reason || CONFIG.po_token.nil? && new_player_response.nil?
+  # Only trigger if reason found or didn't work wth Android client.
+  # TvHtml5ScreenEmbed now requires sig helper for it to work but doesn't work with po_token.
+  if reason && CONFIG.po_token.nil?
     client_config.client_type = YoutubeAPI::ClientType::TvHtml5ScreenEmbed
     new_player_response = try_fetch_streaming_data(video_id, client_config)
   end
@@ -132,8 +142,19 @@ def extract_video_info(video_id : String)
     params.delete("reason")
   end
 
-  {"captions", "playabilityStatus", "playerConfig", "storyboards", "streamingData"}.each do |f|
+  {"captions", "playabilityStatus", "playerConfig", "storyboards"}.each do |f|
     params[f] = player_response[f] if player_response[f]?
+  end
+
+  # Convert URLs, if those are present
+  if streaming_data = player_response["streamingData"]?
+    %w[formats adaptiveFormats].each do |key|
+      streaming_data.as_h[key]?.try &.as_a.each do |format|
+        format.as_h["url"] = JSON::Any.new(convert_url(format))
+      end
+    end
+
+    params["streamingData"] = streaming_data
   end
 
   # Data structure version, for cache control
@@ -185,10 +206,11 @@ def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any
   end
 
   video_details = player_response.dig?("videoDetails")
-  microformat = player_response.dig?("microformat", "playerMicroformatRenderer")
+  if !(microformat = player_response.dig?("microformat", "playerMicroformatRenderer"))
+    microformat = {} of String => JSON::Any
+  end
 
   raise BrokenTubeException.new("videoDetails") if !video_details
-  raise BrokenTubeException.new("microformat") if !microformat
 
   # Basic video infos
 
@@ -225,7 +247,7 @@ def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any
     .try &.as_a.map &.as_s || [] of String
 
   allow_ratings = video_details["allowRatings"]?.try &.as_bool
-  family_friendly = microformat["isFamilySafe"].try &.as_bool
+  family_friendly = microformat["isFamilySafe"]?.try &.as_bool
   is_listed = video_details["isCrawlable"]?.try &.as_bool
   is_upcoming = video_details["isUpcoming"]?.try &.as_bool
 
@@ -442,4 +464,36 @@ def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any
   }
 
   return params
+end
+
+private def convert_url(fmt)
+  if cfr = fmt["signatureCipher"]?.try { |json| HTTP::Params.parse(json.as_s) }
+    sp = cfr["sp"]
+    url = URI.parse(cfr["url"])
+    params = url.query_params
+
+    LOGGER.debug("convert_url: Decoding '#{cfr}'")
+
+    unsig = DECRYPT_FUNCTION.try &.decrypt_signature(cfr["s"])
+    params[sp] = unsig if unsig
+  else
+    url = URI.parse(fmt["url"].as_s)
+    params = url.query_params
+  end
+
+  n = DECRYPT_FUNCTION.try &.decrypt_nsig(params["n"])
+  params["n"] = n if n
+
+  if token = CONFIG.po_token
+    params["pot"] = token
+  end
+
+  url.query_params = params
+  LOGGER.trace("convert_url: new url is '#{url}'")
+
+  return url.to_s
+rescue ex
+  LOGGER.debug("convert_url: Error when parsing video URL")
+  LOGGER.trace(ex.inspect_with_backtrace)
+  return ""
 end
