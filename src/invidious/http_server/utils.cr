@@ -9,16 +9,19 @@ module Invidious::HttpServer
     def check_external_proxy
       CONFIG.external_videoplayback_proxy.each do |proxy|
         begin
-          response = HTTP::Client.get(proxy)
+          response = HTTP::Client.get("#{proxy[:url]}/health")
           if response.status_code == 200
-            @@proxy_alive = proxy
-            LOGGER.debug("CheckExternalProxy: Proxy set to: '#{proxy}'")
+            @@proxy_alive = proxy[:url]
+            LOGGER.debug("CheckExternalProxy: Proxy set to: '#{proxy[:url]}'")
             break
           end
         rescue
-          LOGGER.debug("CheckExternalProxy: Proxy '#{proxy}' is not available")
+          LOGGER.debug("CheckExternalProxy: Proxy '#{proxy[:url]}' is not available")
         end
       end
+	  if @@proxy_alive.empty?
+		LOGGER.warn("CheckExternalProxy: No proxies alive! Using own server proxy")
+	  end
     end
 
     def get_external_proxy
