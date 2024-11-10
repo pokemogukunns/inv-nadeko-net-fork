@@ -32,8 +32,8 @@ RUN if [[ "${release}" == 1 ]] ; then \
         --link-flags "-lxml2 -llzma"; \
     fi
 
-FROM alpine:3.18
-RUN apk add --no-cache rsvg-convert ttf-opensans tini
+FROM alpine:3.20
+RUN apk add --no-cache rsvg-convert ttf-opensans tini tzdata
 WORKDIR /invidious
 RUN addgroup -g 1000 -S invidious && \
     adduser -u 1000 -S invidious -G invidious
