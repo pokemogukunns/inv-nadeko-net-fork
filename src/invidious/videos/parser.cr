@@ -107,23 +107,14 @@ def extract_video_info(video_id : String, user_po_token, user_visitor_data)
 
   new_player_response = nil
 
-  # Don't use Android client if po_token is passed because po_token doesn't
-  # work for Android client.
+  # Don't use Android test suite client if po_token is passed because po_token doesn't
+  # work for Android test suite client.
   if reason.nil? && po_token.nil?
     # Fetch the video streams using an Android client in order to get the
     # decrypted URLs and maybe fix throttling issues (#2194). See the
     # following issue for an explanation about decrypted URLs:
     # https://github.com/TeamNewPipe/NewPipeExtractor/issues/562
     client_config.client_type = YoutubeAPI::ClientType::AndroidTestSuite
-    new_player_response = try_fetch_streaming_data(video_id, client_config, po_token, visitor_data)
-  end
-
-  # Last hope
-  # Only trigger if reason found and po_token or didn't work wth Android client.
-  # TvHtml5ScreenEmbed now requires sig helper for it to work but po_token is not required
-  # if the IP address is not blocked.
-  if po_token.nil? && reason || po_token.nil? && new_player_response.nil?
-    client_config.client_type = YoutubeAPI::ClientType::TvHtml5ScreenEmbed
     new_player_response = try_fetch_streaming_data(video_id, client_config, po_token, visitor_data)
   end
 
@@ -229,8 +220,17 @@ def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any
   premiere_timestamp = microformat.dig?("liveBroadcastDetails", "startTimestamp")
     .try { |t| Time.parse_rfc3339(t.as_s) }
 
+  premiere_timestamp ||= player_response.dig?(
+    "playabilityStatus", "liveStreamability",
+    "liveStreamabilityRenderer", "offlineSlate",
+    "liveStreamOfflineSlateRenderer", "scheduledStartTime"
+  )
+    .try &.as_s.to_i64
+      .try { |t| Time.unix(t) }
+
   live_now = microformat.dig?("liveBroadcastDetails", "isLiveNow")
-    .try &.as_bool || false
+    .try &.as_bool
+  live_now ||= video_details.dig?("isLive").try &.as_bool || false
 
   post_live_dvr = video_details.dig?("isPostLiveDvr")
     .try &.as_bool || false
