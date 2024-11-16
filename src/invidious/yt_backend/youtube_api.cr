@@ -3,8 +3,6 @@
 #
 
 module YoutubeAPI
-  @@visitor_data : String = ""
-
   extend self
 
   # For Android versions, see https://en.wikipedia.org/wiki/Android_version_history
@@ -322,9 +320,7 @@ module YoutubeAPI
       client_context["client"]["platform"] = platform
     end
 
-    if !@@visitor_data.empty?
-      client_context["client"]["visitorData"] = @@visitor_data
-    elsif CONFIG.visitor_data.is_a?(String)
+    if CONFIG.visitor_data.is_a?(String)
       client_context["client"]["visitorData"] = CONFIG.visitor_data.as(String)
     end
 
@@ -460,12 +456,7 @@ module YoutubeAPI
     *, # Force the following parameters to be passed by name
     params : String,
     client_config : ClientConfig | Nil = nil,
-    po_token : String | Nil,
-    visitor_data : String | Nil,
   )
-    if visitor_data
-      @@visitor_data = visitor_data
-    end
     # Playback context, separate because it can be different between clients
     playback_ctx = {
       "html5Preference" => "HTML5_PREF_WANTS",
@@ -491,7 +482,7 @@ module YoutubeAPI
         "contentPlaybackContext" => playback_ctx,
       },
       "serviceIntegrityDimensions" => {
-        "poToken" => po_token || CONFIG.po_token,
+        "poToken" => CONFIG.po_token,
       },
     }
 
@@ -625,9 +616,7 @@ module YoutubeAPI
       headers["User-Agent"] = user_agent
     end
 
-    if !@@visitor_data.empty?
-      headers["X-Goog-Visitor-Id"] = @@visitor_data
-    elsif CONFIG.visitor_data.is_a?(String)
+    if CONFIG.visitor_data.is_a?(String)
       headers["X-Goog-Visitor-Id"] = CONFIG.visitor_data.as(String)
     end
 
