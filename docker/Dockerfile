@@ -23,7 +23,7 @@ RUN crystal spec --warnings all \
     --link-flags "-lxml2 -llzma"
 RUN if [[ "${release}" == 1 ]] ; then \
         crystal build ./src/invidious.cr \
-        --release --mcpu=x86-64-v3 \
+        --release --mcpu=x86-64-v2 \
         --static --warnings all \
         --link-flags "-lxml2 -llzma"; \
     else \
