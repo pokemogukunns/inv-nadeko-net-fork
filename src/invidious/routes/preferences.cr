@@ -228,6 +228,8 @@ module Invidious::Routes::PreferencesRoute
       # TOR or I2P address
       if alt = CONFIG.alternative_domains.index(env.request.headers["Host"])
         env.response.cookies["PREFS"] = Invidious::User::Cookies.prefs(CONFIG.alternative_domains[alt], preferences)
+      elsif alt = CONFIG.backend_domains.index(env.request.headers["Host"])
+        env.response.cookies["PREFS"] = Invidious::User::Cookies.prefs(CONFIG.backend_domains[alt], preferences)
       else
         env.response.cookies["PREFS"] = Invidious::User::Cookies.prefs(CONFIG.domain, preferences)
       end
@@ -269,6 +271,8 @@ module Invidious::Routes::PreferencesRoute
       # TOR or I2P address
       if alt = CONFIG.alternative_domains.index(env.request.headers["Host"])
         env.response.cookies["PREFS"] = Invidious::User::Cookies.prefs(CONFIG.alternative_domains[alt], preferences)
+      elsif alt = CONFIG.backend_domains.index(env.request.headers["Host"])
+        env.response.cookies["PREFS"] = Invidious::User::Cookies.prefs(CONFIG.backend_domains[alt], preferences)
       else
         env.response.cookies["PREFS"] = Invidious::User::Cookies.prefs(CONFIG.domain, preferences)
       end

@@ -64,6 +64,8 @@ module Invidious::Routes::Login
           # TOR or I2P address
           if alt = CONFIG.alternative_domains.index(env.request.headers["Host"])
             env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.alternative_domains[alt], sid)
+          elsif alt = CONFIG.backend_domains.index(env.request.headers["Host"])
+            env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.backend_domains[alt], sid)
           else
             env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.domain, sid)
           end
@@ -170,6 +172,8 @@ module Invidious::Routes::Login
         # TOR or I2P address
         if alt = CONFIG.alternative_domains.index(env.request.headers["Host"])
           env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.alternative_domains[alt], sid)
+        elsif alt = CONFIG.backend_domains.index(env.request.headers["Host"])
+          env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.backend_domains[alt], sid)
         else
           env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.domain, sid)
         end

@@ -1,7 +1,8 @@
 <%
 	locale = env.get("preferences").as(Preferences).locale
 	dark_mode = env.get("preferences").as(Preferences).dark_mode
-	current_backend = env.request.cookies[CONFIG.server_id_cookie_name]?.try &.value
+	current_backend = env.request.cookies[CONFIG.server_id_cookie_name]?.try &.value || env.request.headers["Host"]
+    current_external_videoplayback_proxy = Invidious::HttpServer::Utils.get_external_proxy()
 %>
 <!DOCTYPE html>
 <html lang="<%= locale %>">
@@ -106,6 +107,7 @@
 				</div>
 
 				<% if !CONFIG.backends.empty? %>
+                <% if !CONFIG.backend_domains.includes?(env.request.headers["Host"]) %>
 				<div class="h-box">
 					<b>Switch Backend:</b>
 					<% CONFIG.backends.each do | backend | %>
@@ -128,6 +130,7 @@
                     <% end %>
 				</div>
 				<% end %>
+                <% end %>
 
 				<% if CONFIG.banner %>
 					<div class="h-box">
@@ -311,6 +314,9 @@
             <hr/>
             <div class="footer-footer">
 			<div class="box">You are currently using Backend: <%= current_backend %></div>
+            <% if !current_external_videoplayback_proxy.empty? %>
+            <div class="box">External Videoplayback Proxy: <%= current_external_videoplayback_proxy %></div>
+            <% end %>
                 <span class="left">
                     <% if CONFIG.modified_source_code_url %>
                         <%= translate(locale, "footer_current_version_modified") %>
