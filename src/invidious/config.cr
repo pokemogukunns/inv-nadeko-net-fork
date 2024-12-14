@@ -192,14 +192,13 @@ class Config
   # at the start of the URI
   property external_videoplayback_proxy : Array(NamedTuple(url: String, balance: Bool)) = [] of NamedTuple(url: String, balance: Bool)
 
-  # Job to refresh tokens from a Redis compatible DB
-  property refresh_tokens : Bool = true
-
   property pubsub_domain : String = ""
 
   property ignore_user_tokens : Bool = false
 
   property server_id_cookie_name : String = "INVIDIOUS_SERVER_ID"
+
+  property tokens_server : String = ""
 
   {% if flag?(:linux) %}
     property reload_config_automatically : Bool = true

@@ -54,11 +54,6 @@ def extract_video_info(video_id : String)
   # Init client config for the API
   client_config = YoutubeAPI::ClientConfig.new
 
-  redis_po_token, redis_visitor_data = Tokens.get_tokens
-
-  po_token = redis_po_token || CONFIG.po_token
-  visitor_data = redis_visitor_data || CONFIG.visitor_data
-
   # Fetch data from the player endpoint
   player_response = YoutubeAPI.player(video_id: video_id, params: "2AMB", client_config: client_config)
 
@@ -109,7 +104,7 @@ def extract_video_info(video_id : String)
 
   # Don't use Android test suite client if po_token is passed because po_token doesn't
   # work for Android test suite client.
-  if reason.nil? && po_token.nil?
+  if reason.nil? && CONFIG.po_token.nil?
     # Fetch the video streams using an Android client in order to get the
     # decrypted URLs and maybe fix throttling issues (#2194). See the
     # following issue for an explanation about decrypted URLs:
