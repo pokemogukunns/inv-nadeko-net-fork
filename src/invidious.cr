@@ -214,9 +214,9 @@ if !CONFIG.external_videoplayback_proxy.empty?
 end
 
 if !CONFIG.tokens_server.empty?
-  Invidious::Jobs.register Invidious::Jobs::RefreshTokens.new
+  Invidious::Jobs.register Invidious::Jobs::RefreshSessionTokens.new
 else
-  LOGGER.info("jobs: Disabling RefreshTokens job. Invidious will use the tokens that are on the configuration file")
+  LOGGER.info("jobs: Disabling RefreshSessionTokens job. Invidious will use the tokens that are on the configuration file")
 end
 
 Invidious::Jobs.start_all

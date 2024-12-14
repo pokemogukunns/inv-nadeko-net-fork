@@ -1,10 +1,10 @@
-class Invidious::Jobs::RefreshTokens < Invidious::Jobs::BaseJob
+class Invidious::Jobs::RefreshSessionTokens < Invidious::Jobs::BaseJob
   def initialize
   end
 
   def begin
     loop do
-      Tokens.refresh_tokens
+      SessionTokens.refresh_tokens
       LOGGER.info("RefreshTokens: Done, sleeping for 5 seconds")
       sleep 5.seconds
       Fiber.yield
