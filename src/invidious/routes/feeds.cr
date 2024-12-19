@@ -416,18 +416,22 @@ module Invidious::Routes::Feeds
         author = entry.xpath_node("default:author/default:name", namespaces).not_nil!.content
         published = Time.parse_rfc3339(entry.xpath_node("default:published", namespaces).not_nil!.content)
         updated = Time.parse_rfc3339(entry.xpath_node("default:updated", namespaces).not_nil!.content)
+        ucid = entry.xpath_node("yt:channelId", namespaces).not_nil!.content
+        title = entry.xpath_node("default:title", namespaces).not_nil!.content
 
-        begin
-          video = get_video(id, force_refresh: true)
-        rescue
-          next # skip this video since it raised an exception (e.g. it is a scheduled live event)
+        if CONFIG.use_innertube_for_feeds
+          begin
+            video_ = get_video(id, force_refresh: true)
+          rescue
+            next # skip this video since it raised an exception (e.g. it is a scheduled live event)
+          end
         end
 
         if CONFIG.enable_user_notifications
           # Deliver notifications to `/api/v1/auth/notifications`
           payload = {
-            "topic"     => video.ucid,
-            "videoId"   => video.id,
+            "topic"     => ucid,
+            "videoId"   => id,
             "published" => published.to_unix,
           }.to_json
           PG_DB.exec("NOTIFY notifications, E'#{payload}'")
@@ -435,15 +439,15 @@ module Invidious::Routes::Feeds
 
         video = ChannelVideo.new({
           id:                 id,
-          title:              video.title,
+          title:              title,
           published:          published,
           updated:            updated,
-          ucid:               video.ucid,
+          ucid:               ucid,
           author:             author,
-          length_seconds:     video.length_seconds,
-          live_now:           video.live_now,
-          premiere_timestamp: video.premiere_timestamp,
-          views:              video.views,
+          length_seconds:     video_.try &.length_seconds || 0,
+          live_now:           video_.try &.live_now || false,
+          premiere_timestamp: video_.try &.premiere_timestamp || nil,
+          views:              video_.try &.views || nil,
         })
 
         was_insert = Invidious::Database::ChannelVideos.insert(video, with_premiere_timestamp: true)

@@ -111,6 +111,7 @@ class Config
 
   # Subscribe to channels using PubSubHubbub (requires domain, hmac_key)
   property use_pubsub_feeds : Bool | Int32 = false
+  property use_innertube_for_feeds : Bool = true
   property popular_enabled : Bool = true
   property captcha_enabled : Bool = true
   property login_enabled : Bool = true
