@@ -209,7 +209,7 @@ class Config
 
   # External videoplayback proxies list. They should include `https://`
   # at the start of the URI
-  property external_videoplayback_proxy : Array(NamedTuple(url: String, balance: Bool)) = [] of NamedTuple(url: String, balance: Bool)
+  property external_videoplayback_proxy : Array(String) = [] of String
 
   property pubsub_domain : String = ""
 

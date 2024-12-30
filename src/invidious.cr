@@ -88,7 +88,6 @@ REDDIT_URL      = URI.parse("https://www.reddit.com")
 YT_URL          = URI.parse("https://www.youtube.com")
 PUBSUB_HOST_URL = CONFIG.pubsub_domain
 HOST_URL        = make_host_url(Kemal.config)
-EXT_VIDEOP_LIST = gen_videoplayback_proxy_list()
 
 CHARS_SAFE         = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 TEST_IDS           = {"AgbeGFYluEA", "BaW_jenozKc", "a9LDPn-MO4I", "ddFvjfvPnqk", "iqKdEhx-dD4"}

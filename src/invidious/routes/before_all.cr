@@ -20,12 +20,25 @@ module Invidious::Routes::BeforeAll
     env.response.headers["X-XSS-Protection"] = "1; mode=block"
     env.response.headers["X-Content-Type-Options"] = "nosniff"
 
+    extra_media_csp = ""
+    extra_connect_csp = ""
+
+    if CONFIG.invidious_companion.present?
+      extra_media_csp = " #{CONFIG.invidious_companion.sample.public_url}"
+      extra_connect_csp = " #{CONFIG.invidious_companion.sample.public_url}"
+    end
+
+    if !CONFIG.external_videoplayback_proxy.empty?
+      CONFIG.external_videoplayback_proxy.each do |proxy|
+        extra_media_csp += " #{proxy}"
+        extra_connect_csp += " #{proxy}"
+      end
+    end
+
     # Allow media resources to be loaded from google servers
     # TODO: check if *.youtube.com can be removed
     if CONFIG.disabled?("local") || !preferences.local
-      extra_media_csp = " https://*.googlevideo.com:443 https://*.youtube.com:443"
-    else
-      extra_media_csp = ""
+      extra_media_csp += " https://*.googlevideo.com:443 https://*.youtube.com:443"
     end
 
     # Only allow the pages at /embed/* to be embedded
@@ -43,9 +56,9 @@ module Invidious::Routes::BeforeAll
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data:",
       "font-src 'self' data:",
-      "connect-src 'self'" + CONFIG.invidious_companion.sample.public_url + EXT_VIDEOP_LIST,
+      "connect-src 'self'" + extra_connect_csp,
       "manifest-src 'self'",
-      "media-src 'self' blob:" + extra_media_csp + CONFIG.invidious_companion.sample.public_url + EXT_VIDEOP_LIST,
+      "media-src 'self' blob:" + extra_media_csp,
       "child-src 'self' blob:",
       "frame-src 'self'",
       "frame-ancestors " + frame_ancestors,
