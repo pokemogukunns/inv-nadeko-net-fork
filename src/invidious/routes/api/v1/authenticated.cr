@@ -226,7 +226,7 @@ module Invidious::Routes::API::V1::Authenticated
     end
 
     playlist = create_playlist(title, privacy, user)
-    env.response.headers["Location"] = "#{HOST_URL}/api/v1/auth/playlists/#{playlist.id}"
+    env.response.headers["Location"] = "#{env.request.headers["Host"]}/api/v1/auth/playlists/#{playlist.id}"
     env.response.status_code = 201
     {
       "title"      => title,
