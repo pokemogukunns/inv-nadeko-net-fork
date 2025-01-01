@@ -186,9 +186,8 @@ module Invidious::Routes::API::Manifest
     manifest = response.body
 
     if local
-      manifest = manifest.gsub(/^https:\/\/[^\n"]*/m) do |match|
-        uri = URI.parse(match)
-        path = uri.path
+      manifest = manifest.gsub(/^https:\/\/\w+---.{11}\.c\.youtube\.com[^\n]*/m) do |match|
+        path = URI.parse(match).path
 
         path = path.lchop("/videoplayback/")
         path = path.rchop("/")
@@ -217,7 +216,7 @@ module Invidious::Routes::API::Manifest
           raw_params["fvip"] = fvip["fvip"]
         end
 
-        raw_params["host"] = uri.host.not_nil!
+        raw_params["local"] = "true"
 
         proxy = Invidious::HttpServer::Utils.get_external_proxy
 
