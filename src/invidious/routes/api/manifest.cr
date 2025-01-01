@@ -227,7 +227,7 @@ module Invidious::Routes::API::Manifest
         end
 
         if !proxy.empty?
-          "#{scheme}#{proxy}/videoplayback?#{raw_params}"
+          "#{proxy}/videoplayback?#{raw_params}"
         else
           "#{scheme}#{env.request.headers["Host"]}/videoplayback?#{raw_params}"
         end
