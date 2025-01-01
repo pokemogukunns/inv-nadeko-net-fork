@@ -221,10 +221,16 @@ module Invidious::Routes::API::Manifest
 
         proxy = Invidious::HttpServer::Utils.get_external_proxy
 
-        if !proxy.empty?
-          "#{proxy}/videoplayback?#{raw_params}"
+        if CONFIG.https_only
+          scheme = "https://"
         else
-          "#{env.request.headers["Host"]}/videoplayback?#{raw_params}"
+          scheme = "http://"
+        end
+
+        if !proxy.empty?
+          "#{scheme}#{proxy}/videoplayback?#{raw_params}"
+        else
+          "#{scheme}#{env.request.headers["Host"]}/videoplayback?#{raw_params}"
         end
       end
     end
@@ -248,7 +254,12 @@ module Invidious::Routes::API::Manifest
     manifest = response.body
 
     if local
-      manifest = manifest.gsub("https://www.youtube.com", env.request.headers["Host"])
+      if CONFIG.https_only
+        scheme = "https://"
+      else
+        scheme = "http://"
+      end
+      manifest = manifest.gsub("https://www.youtube.com", "#{scheme}#{env.request.headers["Host"]}")
       manifest = manifest.gsub("index.m3u8", "index.m3u8?local=true")
     end
 
